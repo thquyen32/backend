@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="./css/formstyle.css">
+
+</head>
+
+<body>
+
+    <h2>Room Booking Form</h2>
+
+    <form id="form" method="POST">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required />
+        </div>
+
+        <div>
+            <label for="cccd">cccd:</label>
+            <input type="text" id="cccd" name="cccd" required />
+        </div>
+
+        <div>
+            <label for="phone">Phone number:</label>
+            <input type="tel" id="phone" name="phone" required />
+        </div>
+
+        <div>
+            <label for="room">Room:</label>
+            <select id="room" name="room">
+                <option value="Phong 1">Phong 1</option>
+                <option value="Phong 2">Phong 2</option>
+                <option value="Phong 3">Phong 3</option>
+                <option value="Phong 4">Phong 4</option>
+                <option value="Phong 5">Phong 5</option>
+                <option value="Phong 6">Phong 6</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">BOOK NOW</button>
+        </div>
+    </form>
+
+    <script>
+        const form = document.getElementById('form');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const data = {
+                tenKh: document.getElementById('name').value,
+                cccd: document.getElementById('cccd').value,
+                sdt: document.getElementById('phone').value,
+            };
+
+            const room = document.getElementById('room').value;
+
+            fetch('http://localhost:8080/room/' + room, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert('Booking updated successfully!');
+                        form.reset();
+                    } else {
+                        return res.text().then(msg => { throw new Error(msg); });
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+        });
+    </script>
+</body>
+
+</html>
