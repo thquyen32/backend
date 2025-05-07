@@ -74,22 +74,22 @@ public class room_service {
 
         switch (roomName) {
             case "Phong 1":
-                bill = time * 80000;
+                bill = time * 250;
                 break;
             case "Phong 2":
-                bill = time * 100000;
+                bill = time * 250;
                 break;
             case "Phong 3":
-                bill = time * 200000;
+                bill = time * 250;
                 break;
             case "Phong 4":
-                bill = time * 300000;
+                bill = time * 250;
                 break;
             case "Phong 5":
-                bill = time * 400000;
+                bill = time * 250;
                 break;
             case "Phong 6":
-                bill = time * 500000;
+                bill = time * 250;
                 break;
             default:
                 break;
