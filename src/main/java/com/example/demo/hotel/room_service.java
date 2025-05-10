@@ -6,24 +6,41 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class room_service {
     private final roomRepo repotority;
+    @Autowired
+    private JavaMailSender EmailSender;
 
     @Autowired
     public room_service(roomRepo repotority) {
         this.repotority = repotority;
     }
 
-    public boolean find(room rooms) {
-        Optional<room> roomOptional = repotority.findRoomByRoomName(rooms.getRoomName());
+    public boolean check(String roomName, room rooms) {
+        Optional<room> roomOptional = repotority.findRoomByRoomName(roomName);
         if (roomOptional.isPresent()) {
-            return true;
-        } else {
-            return false;
+            room saveRoom = roomOptional.get();
+            if (saveRoom.getState() == true) {
+                System.out.println("co phong r");
+                return false;
+            } else {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo("gaosilver831@gmail.com");
+                message.setSubject("Dat Phong");
+                message.setText("Khách: " + rooms.getTenKh() +
+                        "\nCCCD: " + rooms.getCCCD() +
+                        "\nSĐT: " + rooms.getSdt() +
+                        "\nPhòng: " + roomName);
+                EmailSender.send(message);
+                System.out.println("Gui mail");
+            }
         }
+        return true;
     }
 
     public long delete(String roomName) {

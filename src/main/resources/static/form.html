@@ -62,7 +62,7 @@
 
             const room = document.getElementById('room').value;
 
-            fetch('http://localhost:8080/room/' + room, {
+            fetch('http://localhost:8080/room/check/' + room, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -71,10 +71,21 @@
             })
                 .then(res => {
                     if (res.ok) {
-                        alert('Booking updated successfully!');
-                        form.reset();
+                        return res.text()
                     } else {
                         return res.text().then(msg => { throw new Error(msg); });
+                    }
+                })
+                .then(res => {
+                    if (res == "true") {
+
+                        alert('Booking updated successfully!');
+                        form.reset();
+                    }
+                    else if (res == "false") {
+                        console.log(res);
+                        alert('Phong da duoc dat');
+                        form.reset();
                     }
                 })
                 .catch(error => {
