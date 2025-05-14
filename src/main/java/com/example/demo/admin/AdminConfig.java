@@ -15,9 +15,8 @@ public class AdminConfig {
             if (adminRepo.count() == 0) {
                 Admin ad1= new Admin(null,"domixi","123"); 
                 Admin ad2= new Admin(null,"bopc","5678"); 
-                Admin ad3= new Admin(null,"qnt","8386"); 
-                Admin ad4= new Admin(null,"moxumxue","01td"); 
-                adminRepo.saveAll(List.of(ad1,ad2,ad3,ad4));
+
+                adminRepo.saveAll(List.of(ad1,ad2));
         }
     };
     }

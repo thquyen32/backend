@@ -6,24 +6,41 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class room_service {
     private final roomRepo repotority;
+    @Autowired
+    private JavaMailSender EmailSender;
 
     @Autowired
     public room_service(roomRepo repotority) {
         this.repotority = repotority;
     }
 
-    public boolean find(room rooms) {
-        Optional<room> roomOptional = repotority.findRoomByRoomName(rooms.getRoomName());
+    public boolean check(String roomName, room rooms) {
+        Optional<room> roomOptional = repotority.findRoomByRoomName(roomName);
         if (roomOptional.isPresent()) {
-            return true;
-        } else {
-            return false;
+            room saveRoom = roomOptional.get();
+            if (saveRoom.getState() == true) {
+                System.out.println("co phong r");
+                return false;
+            } else {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo("gaosilver831@gmail.com");
+                message.setSubject("Dat Phong");
+                message.setText("Khách: " + rooms.getTenKh() +
+                        "\nCCCD: " + rooms.getCCCD() +
+                        "\nSĐT: " + rooms.getSdt() +
+                        "\nPhòng: " + roomName);
+                EmailSender.send(message);
+                System.out.println("Gui mail");
+            }
         }
+        return true;
     }
 
     public long delete(String roomName) {
@@ -74,22 +91,22 @@ public class room_service {
 
         switch (roomName) {
             case "Phong 1":
-                bill = time * 250;
+                bill = time * 80000;
                 break;
             case "Phong 2":
-                bill = time * 250;
+                bill = time * 100000;
                 break;
             case "Phong 3":
-                bill = time * 250;
+                bill = time * 200000;
                 break;
             case "Phong 4":
-                bill = time * 250;
+                bill = time * 300000;
                 break;
             case "Phong 5":
-                bill = time * 250;
+                bill = time * 400000;
                 break;
             case "Phong 6":
-                bill = time * 250;
+                bill = time * 500000;
                 break;
             default:
                 break;

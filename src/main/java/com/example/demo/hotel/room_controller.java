@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +21,15 @@ public class room_controller {
         this.room_service = room_service;
     }
 
-    @PostMapping("/find")
-    public boolean find(@RequestBody room rooms) {
-        return room_service.find(rooms);
+    @PutMapping(path = "/check/{roomName}")
+    public String check(
+            @PathVariable("roomName") String roomName,
+            @RequestBody room rooms) {
+        if (room_service.check(roomName, rooms) == true) {
+            return "true";
+        } else {
+            return "false";
+        }
     }
 
     @PutMapping(path = "/update/{roomName}")

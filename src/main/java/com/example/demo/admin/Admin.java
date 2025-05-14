@@ -4,6 +4,8 @@
  */
 package com.example.demo.admin;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +20,11 @@ public class Admin {
     private Long id;
     private String username;
     private String password;
+    private String fullName;
+    private String email;
+    private String phoneNumber;
+    private LocalDateTime lastlogin;
+    private LocalDateTime lastlogout;
     
    public Admin()
     {
@@ -51,6 +58,46 @@ public class Admin {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public LocalDateTime getLastlogin() {
+        return lastlogin;
+    }
+
+    public void setLastlogin(LocalDateTime lastlogin) {
+        this.lastlogin = lastlogin;
+    }
+
+    public LocalDateTime getLastlogout() {
+        return lastlogout;
+    }
+
+    public void setLastlogout(LocalDateTime lastlogout) {
+        this.lastlogout = lastlogout;
     }
     
     

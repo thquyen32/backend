@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Đăng Nhập</title>
+    <link rel="stylesheet" href="/css/loginStyle.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Đăng Nhập</h2>
+        <input type="text" id="username" placeholder="Tên người dùng">
+        <input type="password" id="password" placeholder="Mật khẩu">
+        <button onclick="login()">Đăng Nhập</button>
+        <button onclick="register()" class="register-button">Đăng Ký</button>
+        <div id="message" class="message"></div>
+    </div>
+    <script>
+    async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const messageDiv = document.getElementById("message");
+
+        // Gửi yêu cầu POST tới API /login
+        try {
+            const response = await fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                messageDiv.textContent = "Đăng nhập thành công!";
+                messageDiv.style.color = "green";
+                // Chuyển hướng sau khi đăng nhập thành công
+                window.location.href = "/admin/home"; 
+            } else {
+                messageDiv.textContent = result.error || "Đăng nhập thất bại!";
+                messageDiv.style.color = "red";
+            }
+        } catch (error) {
+            console.error("Lỗi khi đăng nhập:", error);
+            messageDiv.textContent = "Có lỗi xảy ra. Vui lòng thử lại sau.";
+            messageDiv.style.color = "red";
+        }
+    }
+
+    function register() {
+        // Điều hướng sang trang đăng ký
+        window.location.href = "/admin/register"; // hoặc URL đăng ký của bạn
+    }
+</script>
+
+</body>
+</html>

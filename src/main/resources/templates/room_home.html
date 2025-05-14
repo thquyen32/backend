@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản Lý Phòng Khách Sạn</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ecf0f1;
+    }
+
+    .container {
+      width: 100%;
+      padding: 20px;
+      background-color: #fff;
+      margin-top: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #bdc3c7;
+    }
+
+    th {
+      background-color: #34495e;
+      color: white;
+    }
+
+    button {
+      padding: 6px 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .back-button {
+      background-color: #f44336;
+    }
+
+    .back-button:hover {
+      background-color: #d32f2f;
+    }
+
+    .user-info-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      text-align: right;
+    }
+
+    .user-greeting {
+      color: #333;
+      font-weight: bold;
+      display: block; 
+      margin-bottom: 8px;
+    }
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+     background-color: #fff;
+     margin: 10% auto;
+     padding: 20px;
+     border-radius: 10px;
+     width: 300px;
+     text-align: center;
+     box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    .close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="user-info-container">
+    <div class="user-greeting">
+      Tài khoản: <span id="usernameDisplay">Đang tải...</span>
+    </div>
+    <button class="back-button" onclick="Back()">Quay về</button>
+  </div>
+
+  <div class="container">
+    <h1>Quản Lý Phòng Khách Sạn</h1>
+
+    <!-- Bảng phòng -->
+    <table id="roomTable">
+      <thead>
+        <tr>
+          <th>Phòng</th>
+          <th>Khách Hàng</th>
+          <th>Trạng Thái</th>
+          <th>Hành Động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Các phòng sẽ được thêm vào ở đây -->
+      </tbody>
+    </table>
+
+    <button onclick="openBookingForm()">Đặt Phòng</button>
+  </div>
+  <!-- Modal hóa đơn -->
+    <div id="invoiceModal" style="display:none;" class="modal">
+        <div class="modal-content">
+        <span class="close" onclick="closeInvoiceModal()">&times;</span>
+        <h2>Hóa Đơn Thanh Toán</h2>
+        <p><strong>Phòng:</strong> <span id="invoiceRoom"></span></p>
+        <p><strong>Tổng tiền:</strong> <span id="invoiceTotal"></span> VND</p>
+        <button onclick="closeInvoiceModal()">Đóng</button>
+        </div>
+    </div>
+
+  <script>
+    // Lấy thông tin admin từ API và hiển thị tên người dùng
+    async function fetchAdminInfo() {
+      try {
+        const res = await fetch("/api/getAdminInfo");
+        const data = await res.json();
+        if (data.success) {
+          const info = data.adminInfo;
+          document.getElementById("usernameDisplay").innerText = info.username;
+        } else {
+          alert(data.error);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin admin:", error);
+      }
+    }
+
+    // Lấy danh sách các phòng từ API
+    async function fetchRooms() {
+      try {
+        const response = await fetch('/room/get');
+        const rooms = await response.json();
+
+        const roomTable = document.getElementById("roomTable").getElementsByTagName('tbody')[0];
+        roomTable.innerHTML = '';  // Clear table before adding new rows
+
+        rooms.forEach(room => {
+          let status = room.state ? 'Đã Đặt' : 'Trống';
+
+
+          const row = roomTable.insertRow();
+          row.innerHTML = `
+            <td>${room.roomName}</td>
+            <td>${room.tenKh ? room.tenKh : 'Chưa có'}</td>
+            <td>${status}</td>
+            <td>
+                ${room.state === 'Đã Đặt' ? `<button onclick="checkInRoom('${room.roomName}')">Check-in</button>` : ''}
+                <button onclick="cancelRoom('${room.roomName}')">Hủy Phòng</button>
+            </td>
+
+          `;
+        });
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin phòng:", error);
+      }
+    }
+
+    
+
+    // Hủy phòng
+    async function cancelRoom(roomName) {
+    try {
+    const response = await fetch(`/room/delete/{roomName}`, { method: 'DELETE' });
+
+    if (response.ok) {
+      const result = await response.json();
+      const tongTien = result.total;
+
+      // Hiển thị thông tin hóa đơn trong modal
+      document.getElementById("invoiceRoom").innerText = roomName;
+      document.getElementById("invoiceTotal").innerText = tongTien.toLocaleString();
+
+      // Mở modal
+      document.getElementById("invoiceModal").style.display = "block";
+
+      // Cập nhật danh sách phòng
+      fetchRooms();
+    } else {
+      alert("Có lỗi khi hủy phòng.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi hủy phòng:", error);
+    alert("Lỗi kết nối máy chủ.");
+  }
+}
+
+    async function Back() {
+      window.location.href = "/admin/home"; // Chuyển hướng về trang chính
+    }
+    function openBookingForm() {
+    window.location.href = "/admin/bookingform";
+    }
+    function closeInvoiceModal() {
+    document.getElementById("invoiceModal").style.display = "none";
+    }
+
+
+    window.onload = () => {
+      fetchRooms();
+      fetchAdminInfo();
+    };
+  </script>
+
+</body>
+</html>

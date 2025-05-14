@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 180px;
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar h2 {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .sidebar button {
+      background-color: transparent;
+      border: none;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .sidebar button:hover,
+    .sidebar button.active {
+      background-color: #34495e;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      background-color: #ecf0f1;
+      overflow-y: auto;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #bdc3c7;
+    }
+
+    th {
+      background-color: #34495e;
+      color: white;
+    }
+
+    form {
+      max-width: 500px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      width: 150px;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      flex: 1;
+      padding: 6px;
+    }
+
+    button {
+      padding: 6px 12px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2 id="adminName">Đang tải...</h2>
+    <button onclick="showSection('infoSection')" class="active">Thông tin cá nhân</button>
+    <button onclick="showSection('updateSection')">Cập nhật thông tin</button>
+    <button onclick="showSection('passwordSection')">Đổi mật khẩu</button>
+    <button onclick="showSection('adminListSection')">Danh sách Admin</button>
+    <button onclick="window.location.href='/admin/room_home'">Quản lý phòng</button>
+    <button onclick="showSection('logsSection')">Nhật ký đăng nhập</button>
+    <button onclick="logout()">Đăng xuất</button>
+  </div>
+
+  <div class="content">
+    <div id="infoSection">
+      <h2>Thông tin cá nhân</h2>
+      <div id="adminInfo"></div>
+    </div>
+
+    <div id="updateSection" class="hidden">
+      <h2>Cập nhật thông tin</h2>
+      <form onsubmit="updateInfo(event)">
+        <div class="form-group">
+          <label for="fullName">Họ tên:</label>
+          <input type="text" id="fullName">
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email">
+        </div>
+        <div class="form-group">
+          <label for="phoneNumber">SĐT:</label>
+          <input type="text" id="phoneNumber">
+        </div>
+        <button type="submit">Cập nhật</button>
+      </form>
+    </div>
+
+    <div id="passwordSection" class="hidden">
+      <h2>Đổi mật khẩu</h2>
+      <form onsubmit="changePassword(event)">
+        <div class="form-group">
+          <label for="oldPass">Mật khẩu cũ:</label>
+          <input type="password" id="oldPass">
+        </div>
+        <div class="form-group">
+          <label for="newPass">Mật khẩu mới:</label>
+          <input type="password" id="newPass">
+        </div>
+        <button type="submit">Đổi mật khẩu</button>
+      </form>
+    </div>
+
+    <div id="adminListSection" class="hidden">
+      <h2>Danh sách Admin</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>SĐT</th>
+            <th>Lần đăng nhập</th>
+            <th>Lần đăng xuất</th>
+          </tr>
+        </thead>
+        <tbody id="adminList"></tbody>
+      </table>
+    </div>
+
+    <div id="logsSection" class="hidden">
+      <h2>Nhật ký đăng nhập</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Login</th>
+            <th>Logout</th>
+          </tr>
+        </thead>
+        <tbody id="logList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.content > div').forEach(div => div.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+      const button = Array.from(document.querySelectorAll('.sidebar button')).find(btn => btn.textContent.includes(document.querySelector(`#${id} h2`).textContent));
+      if (button) button.classList.add('active');
+    }
+
+    async function fetchAdminInfo() {
+      const res = await fetch("/api/getAdminInfo");
+      const data = await res.json();
+      if (data.success) {
+        const info = data.adminInfo;
+        document.getElementById("adminInfo").innerHTML = `
+          <p><strong>Username:</strong> ${info.username}</p>
+          <p><strong>Họ tên:</strong> ${info.fullName}</p>
+          <p><strong>Email:</strong> ${info.email}</p>
+          <p><strong>SĐT:</strong> ${info.phoneNumber}</p>
+        `;
+        document.getElementById("fullName").value = info.fullName;
+        document.getElementById("email").value = info.email;
+        document.getElementById("phoneNumber").value = info.phoneNumber;
+        document.getElementById("adminName").textContent = info.username;
+      } else {
+        alert(data.error);
+      }
+    }
+
+    async function updateInfo(event) {
+      event.preventDefault();
+      const res = await fetch("/api/updateInfo", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: document.getElementById("fullName").value,
+          email: document.getElementById("email").value,
+          phoneNumber: document.getElementById("phoneNumber").value
+        })
+      });
+      const data = await res.json();
+      alert(data.success ? "Cập nhật thành công!" : data.error);
+      fetchAdminInfo();
+    }
+
+    async function changePassword(event) {
+      event.preventDefault();
+      const res = await fetch("/api/changePassword", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldPass: document.getElementById("oldPass").value,
+          newPass: document.getElementById("newPass").value
+        })
+      });
+      const data = await res.json();
+      alert(data.success ? "Đổi mật khẩu thành công!" : data.error);
+    }
+
+    async function fetchAdmins() {
+      const res = await fetch("/api/getAllAdmins");
+      const admins = await res.json();
+      const tbody = document.getElementById("adminList");
+      tbody.innerHTML = "";
+      admins.forEach(a => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${a.username}</td>
+            <td>${a.fullName}</td>
+            <td>${a.email}</td>
+            <td>${a.phoneNumber}</td>
+            <td>${a.lastLogin || ""}</td>
+            <td>${a.lastLogout || ""}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function fetchLogs() {
+      const res = await fetch("/api/getAdminLogs");
+      const logs = await res.json();
+      const tbody = document.getElementById("logList");
+      tbody.innerHTML = "";
+      logs.forEach(log => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${log.username}</td>
+            <td>${log.loginTime || ""}</td>
+            <td>${log.logoutTime || ""}</td>
+          </tr>
+        `;
+      });
+    }
+
+  
+
+
+    async function logout() {
+      await fetch("/api/logout");
+      alert("Đã đăng xuất");
+      window.location.href = "/admin/login";
+    }
+
+    window.onload = () => {
+      fetchAdminInfo();
+      fetchAdmins();
+      fetchLogs();
+    };
+  </script>
+</body>
+</html>

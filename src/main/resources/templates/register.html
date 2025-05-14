@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Đăng Ký</title>
+    <link rel="stylesheet" href="/css/registerStyle.css"> 
+</head>
+<body>
+    <div class="login-container">
+        <h2>Đăng Ký</h2>
+        <input type="text" id="username" placeholder="Tên người dùng" required>
+        <input type="password" id="password" placeholder="Mật khẩu" required>
+        <input type="text" id="fullName" placeholder="Họ và tên">
+        <input type="email" id="email" placeholder="Email">
+        <input type="text" id="phoneNumber" placeholder="Số điện thoại">
+        <button onclick="register()">Đăng Ký</button>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        async function register() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const fullName = document.getElementById("fullName").value;
+            const email = document.getElementById("email").value;
+            const phoneNumber = document.getElementById("phoneNumber").value;
+            const messageDiv = document.getElementById("message");
+
+            try {
+                const response = await fetch("/api/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        fullName,
+                        email,
+                        phoneNumber
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.textContent = "Đăng ký thành công! Vui lòng đăng nhập.";
+                    messageDiv.style.color = "green";
+                    setTimeout(() => {
+                        window.location.href = "/admin/login"; 
+                    }, 2000);
+                } else {
+                    messageDiv.textContent = result.error || "Đăng ký thất bại!";
+                    messageDiv.style.color = "red";
+                }
+            } catch (error) {
+                console.error("Lỗi đăng ký:", error);
+                messageDiv.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
+                messageDiv.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
