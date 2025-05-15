@@ -53,6 +53,7 @@ public class room_service {
         saveRoom.setSdt(null);
         saveRoom.setTenKh(null);
         saveRoom.setCCCD(null);
+        saveRoom.setDate(null);
         repotority.save(saveRoom);
         System.out.println(time);
         return tinhtien(time, roomName);

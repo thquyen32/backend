@@ -181,7 +181,7 @@
             <td>${room.tenKh ? room.tenKh : 'Chưa có'}</td>
             <td>${status}</td>
             <td>
-                ${room.state === 'Đã Đặt' ? `<button onclick="checkInRoom('${room.roomName}')">Check-in</button>` : ''}
+                ${room.state && !room.date ? `<button id="checkin-${room.roomName}" onclick="checkInRoom('${room.roomName}')">Check-in</button>` : ''}
                 <button onclick="cancelRoom('${room.roomName}')">Hủy Phòng</button>
             </td>
 
@@ -192,20 +192,47 @@
       }
     }
 
-    
+    async function checkInRoom(roomName) {
+    try {
+        const response = await fetch(`/room/update/${roomName}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ roomName: roomName })
+      });
+
+      if (response.ok) {
+        alert('Đã check-in thành công!');
+      
+        const button = document.getElementById(`checkin-${roomName}`);
+        if (button) {
+        button.style.display = 'none';
+        }
+
+        } else {
+        const errorText = await response.text();
+        alert('Lỗi khi check-in: ' + errorText);
+        }
+    } catch (error) {
+    console.error('Lỗi khi gọi API check-in:', error);
+    alert('Đã xảy ra lỗi khi check-in.');
+    }
+  }
+
 
     // Hủy phòng
-    async function cancelRoom(roomName) {
-    try {
-    const response = await fetch(`/room/delete/{roomName}`, { method: 'DELETE' });
+   async function cancelRoom(roomName) {
+  try {
+    const response = await fetch(`/room/delete/${roomName}`, { method: 'DELETE' });
 
     if (response.ok) {
-      const result = await response.json();
-      const tongTien = result.total;
+      const tongTien = await response.text(); // response là kiểu long
+      const tongTienSo = parseInt(tongTien);  // chuyển sang số để format
 
       // Hiển thị thông tin hóa đơn trong modal
       document.getElementById("invoiceRoom").innerText = roomName;
-      document.getElementById("invoiceTotal").innerText = tongTien.toLocaleString();
+      document.getElementById("invoiceTotal").innerText = tongTienSo.toLocaleString();
 
       // Mở modal
       document.getElementById("invoiceModal").style.display = "block";

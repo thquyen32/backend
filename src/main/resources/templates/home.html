@@ -188,10 +188,11 @@
     }
 
     async function fetchAdminInfo() {
-      const res = await fetch("/api/getAdminInfo");
+      const res = await fetch("/api/getAdminInfo?t=" + new Date().getTime());
       const data = await res.json();
       if (data.success) {
         const info = data.adminInfo;
+        console.log(info);
         document.getElementById("adminInfo").innerHTML = `
           <p><strong>Username:</strong> ${info.username}</p>
           <p><strong>Họ tên:</strong> ${info.fullName}</p>
@@ -219,8 +220,13 @@
         })
       });
       const data = await res.json();
-      alert(data.success ? "Cập nhật thành công!" : data.error);
-      fetchAdminInfo();
+      if (data.success) {
+        alert("Cập nhật thông tin thành công!");
+        await fetchAdminInfo();
+        await fetchAdmins();
+      } else {
+        alert(data.error);
+      }
     }
 
     async function changePassword(event) {
@@ -234,11 +240,17 @@
         })
       });
       const data = await res.json();
-      alert(data.success ? "Đổi mật khẩu thành công!" : data.error);
+      if (data.success){
+        alert("Đổi mật khẩu thành công! Đang đăng xuất...");
+        await fetch("/api/logout");
+        window.location.href = "/admin/login";
+      } else {
+        alert(data.error);
+      }
     }
 
     async function fetchAdmins() {
-      const res = await fetch("/api/getAllAdmins");
+      const res = await fetch("/api/getAllAdmins?t=" + new Date().getTime());
       const admins = await res.json();
       const tbody = document.getElementById("adminList");
       tbody.innerHTML = "";

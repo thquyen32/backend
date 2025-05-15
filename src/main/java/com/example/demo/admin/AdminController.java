@@ -31,6 +31,8 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private AdminLogRepo adminLogRepo;
+    @Autowired
+    private AdminRepo adminRepo;
 
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> data, HttpSession session) {
@@ -98,15 +100,18 @@ public class AdminController {
     public Map<String,Object> getInfo(HttpSession session) {
         Admin admin = (Admin) session.getAttribute("admin");
             if (admin != null) {
+                Optional<Admin> adminOpt = adminRepo.findByUsername(admin.getUsername());
+            if (adminOpt.isPresent()) {
+                Admin a = adminOpt.get();
                 Map<String, Object> adminInfo = new HashMap<>();
-                adminInfo.put("username", admin.getUsername());
-                adminInfo.put("fullName", admin.getFullName());
-                adminInfo.put("email", admin.getEmail());
-                adminInfo.put("phoneNumber", admin.getPhoneNumber());
+                adminInfo.put("username", a.getUsername());
+                adminInfo.put("fullName", a.getFullName());
+                adminInfo.put("email", a.getEmail());
+                adminInfo.put("phoneNumber", a.getPhoneNumber());
                 return Map.of("success", true, "adminInfo", adminInfo);
-            } else {
-                return Map.of("success", false, "error", "Chưa đăng nhập!");
+            } 
         }
+                return Map.of("success", false, "error", "Chưa đăng nhập!");
     }
 
     @PutMapping("/updateInfo")

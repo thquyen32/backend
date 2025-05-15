@@ -77,4 +77,7 @@ public class room {
     public void setDate() {
         this.date = LocalDateTime.now();
     }
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
 }
