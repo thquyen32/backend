@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đặt Phòng</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      padding: 40px;
+    }
+
+    .form-container {
+      max-width: 500px;
+      background: white;
+      padding: 20px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .back-btn {
+      background-color: #e74c3c;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Đặt Phòng Khách Sạn</h2>
+
+  <label for="roomSelect">Chọn phòng:</label>
+  <select id="roomSelect">
+    <option disabled selected>Đang tải danh sách phòng...</option>
+  </select>
+
+  <label for="tenKH">Tên khách hàng:</label>
+  <input type="text" id="tenKH" placeholder="Nhập tên khách">
+
+  <label for="sdt">Số điện thoại:</label>
+  <input type="text" id="sdt" placeholder="Nhập số điện thoại">
+
+  <label for="cccd">CCCD:</label>
+  <input type="text" id="cccd" placeholder="Nhập số CCCD">
+
+  <button onclick="submitBooking()">Đặt Phòng</button>
+  <button class="back-btn" onclick="window.location.href='/admin/room_home'">Quay lại</button>
+</div>
+
+<script>
+  // Lấy danh sách phòng từ API
+  async function loadRooms() {
+    const select = document.getElementById("roomSelect");
+    select.innerHTML = '<option disabled selected>Đang tải...</option>';
+    try {
+      const response = await fetch("/room/get");
+      const rooms = await response.json();
+
+      select.innerHTML = '';
+
+      rooms
+        .filter(room => room.state === "Đã Đặt" || room.state === false || !room.status)
+        .forEach(room => {
+          const option = document.createElement("option");
+          option.value = room.roomName;
+          option.text = room.roomName;
+          select.appendChild(option);
+        });
+
+      if (select.options.length === 0) {
+        const option = document.createElement("option");
+        option.text = "Không còn phòng trống";
+        option.disabled = true;
+        select.appendChild(option);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách phòng:", error);
+      select.innerHTML = '<option disabled selected>Lỗi khi tải danh sách</option>';
+    }
+  }
+
+  // Gửi yêu cầu đặt phòng
+  async function submitBooking() {
+    const roomName = document.getElementById("roomSelect").value;
+    const tenKh = document.getElementById("tenKH").value.trim();
+    const sdt = document.getElementById("sdt").value.trim();
+    const cccd = document.getElementById("cccd").value.trim();
+
+    if (!roomName || !tenKh || !sdt || !cccd) {
+      alert("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
+    const bookingInfo = {
+      tenKh: tenKh,
+      sdt: sdt,
+      cccd: cccd
+    };
+
+    try {
+      const response = await fetch(`/room/${roomName}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingInfo)
+      });
+
+      if (response.ok) {
+        alert("Đặt phòng thành công!");
+        window.location.href = "/admin/room_home"; // Quay về trang quản lý
+      } else {
+        alert("Có lỗi khi đặt phòng.");
+      }
+    } catch (err) {
+      console.error("Lỗi khi gửi yêu cầu đặt phòng:", err);
+    }
+  }
+
+  // Tải danh sách phòng khi load form
+  window.onload = loadRooms;
+</script>
+
+</body>
+</html>
