@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <title>Quản Lý Phòng Khách Sạn</title>
@@ -29,7 +30,8 @@
       margin-bottom: 20px;
     }
 
-    th, td {
+    th,
+    td {
       padding: 12px;
       text-align: left;
       border: 1px solid #bdc3c7;
@@ -71,41 +73,42 @@
     .user-greeting {
       color: #333;
       font-weight: bold;
-      display: block; 
+      display: block;
       margin-bottom: 8px;
     }
+
     .modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
     }
 
     .modal-content {
-     background-color: #fff;
-     margin: 10% auto;
-     padding: 20px;
-     border-radius: 10px;
-     width: 300px;
-     text-align: center;
-     box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
 
     .close {
-    color: #aaa;
-    float: right;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
     }
-
   </style>
 </head>
+
 <body>
   <div class="user-info-container">
     <div class="user-greeting">
@@ -135,15 +138,15 @@
     <button onclick="openBookingForm()">Đặt Phòng</button>
   </div>
   <!-- Modal hóa đơn -->
-    <div id="invoiceModal" style="display:none;" class="modal">
-        <div class="modal-content">
-        <span class="close" onclick="closeInvoiceModal()">&times;</span>
-        <h2>Hóa Đơn Thanh Toán</h2>
-        <p><strong>Phòng:</strong> <span id="invoiceRoom"></span></p>
-        <p><strong>Tổng tiền:</strong> <span id="invoiceTotal"></span> VND</p>
-        <button onclick="closeInvoiceModal()">Đóng</button>
-        </div>
+  <div id="invoiceModal" style="display:none;" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeInvoiceModal()">&times;</span>
+      <h2>Hóa Đơn Thanh Toán</h2>
+      <p><strong>Phòng:</strong> <span id="invoiceRoom"></span></p>
+      <p><strong>Tổng tiền:</strong> <span id="invoiceTotal"></span>$</p>
+      <button onclick="closeInvoiceModal()">Đóng</button>
     </div>
+  </div>
 
   <script>
     // Lấy thông tin admin từ API và hiển thị tên người dùng
@@ -193,69 +196,69 @@
     }
 
     async function checkInRoom(roomName) {
-    try {
+      try {
         const response = await fetch(`/room/update/${roomName}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ roomName: roomName })
-      });
+          },
+          body: JSON.stringify({ roomName: roomName })
+        });
 
-      if (response.ok) {
-        alert('Đã check-in thành công!');
-      
-        const button = document.getElementById(`checkin-${roomName}`);
-        if (button) {
-        button.style.display = 'none';
-        }
+        if (response.ok) {
+          alert('Đã check-in thành công!');
+
+          const button = document.getElementById(`checkin-${roomName}`);
+          if (button) {
+            button.style.display = 'none';
+          }
 
         } else {
-        const errorText = await response.text();
-        alert('Lỗi khi check-in: ' + errorText);
+          const errorText = await response.text();
+          alert('Lỗi khi check-in: ' + errorText);
         }
-    } catch (error) {
-    console.error('Lỗi khi gọi API check-in:', error);
-    alert('Đã xảy ra lỗi khi check-in.');
+      } catch (error) {
+        console.error('Lỗi khi gọi API check-in:', error);
+        alert('Đã xảy ra lỗi khi check-in.');
+      }
     }
-  }
 
 
     // Hủy phòng
-   async function cancelRoom(roomName) {
-  try {
-    const response = await fetch(`/room/delete/${roomName}`, { method: 'DELETE' });
+    async function cancelRoom(roomName) {
+      try {
+        const response = await fetch(`/room/delete/${roomName}`, { method: 'DELETE' });
 
-    if (response.ok) {
-      const tongTien = await response.text(); // response là kiểu long
-      const tongTienSo = parseInt(tongTien);  // chuyển sang số để format
+        if (response.ok) {
+          const tongTien = await response.text(); // response là kiểu long
+          const tongTienSo = parseInt(tongTien);  // chuyển sang số để format
 
-      // Hiển thị thông tin hóa đơn trong modal
-      document.getElementById("invoiceRoom").innerText = roomName;
-      document.getElementById("invoiceTotal").innerText = tongTienSo.toLocaleString();
+          // Hiển thị thông tin hóa đơn trong modal
+          document.getElementById("invoiceRoom").innerText = roomName;
+          document.getElementById("invoiceTotal").innerText = tongTienSo.toLocaleString();
 
-      // Mở modal
-      document.getElementById("invoiceModal").style.display = "block";
+          // Mở modal
+          document.getElementById("invoiceModal").style.display = "block";
 
-      // Cập nhật danh sách phòng
-      fetchRooms();
-    } else {
-      alert("Có lỗi khi hủy phòng.");
+          // Cập nhật danh sách phòng
+          fetchRooms();
+        } else {
+          alert("Có lỗi khi hủy phòng.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi hủy phòng:", error);
+        alert("Lỗi kết nối máy chủ.");
+      }
     }
-  } catch (error) {
-    console.error("Lỗi khi hủy phòng:", error);
-    alert("Lỗi kết nối máy chủ.");
-  }
-}
 
     async function Back() {
       window.location.href = "/admin/home"; // Chuyển hướng về trang chính
     }
     function openBookingForm() {
-    window.location.href = "/admin/bookingform";
+      window.location.href = "/admin/bookingform";
     }
     function closeInvoiceModal() {
-    document.getElementById("invoiceModal").style.display = "none";
+      document.getElementById("invoiceModal").style.display = "none";
     }
 
 
@@ -266,4 +269,5 @@
   </script>
 
 </body>
+
 </html>

@@ -75,8 +75,10 @@ public class room {
     }
 
     public void setDate() {
-        this.date = LocalDateTime.now();
+        LocalDateTime fixedDateTime = LocalDateTime.of(2025, 5, 15, 22, 0);
+        this.date = fixedDateTime;
     }
+
     public void setDate(LocalDateTime date) {
         this.date = date;
     }
